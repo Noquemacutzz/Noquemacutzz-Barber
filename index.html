@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termin buchen - Noquemacutzz Barber</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1c1c1c;
+      padding: 35px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .contact-info {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #2a2a2a;
+      border-radius: 10px;
+    }
+
+    .contact-info p {
+      color: #ffd166;
+      font-weight: bold;
+      margin: 5px 0;
+      font-size: 18px;
+    }
+
+    .description {
+      color: #cfcfcf;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .prices {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      line-height: 1.8;
+    }
+
+    .prices strong {
+      display: block;
+      margin-bottom: 10px;
+      color: #ffd166;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    input,
+    select {
+      background: #2d2d2d;
+      color: white;
+    }
+
+    input::placeholder {
+      color: #999;
+    }
+
+    button {
+      background: white;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.85;
+      background: #ffd166;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .cash {
+      margin-top: 18px;
+      text-align: center;
+      color: #ffd166;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .success {
+      background: #2d5016;
+      color: #90ee90;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+      text-align: center;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      color: #ffd166;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #2d2d2d;
+      border-radius: 50%;
+      border-top-color: #ffd166;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Buche deinen Termin</h1>
+
+    <div class="contact-info">
+      <p>☎️ 078 697 15 09</p>
+      <p style="color: #cfcfcf; font-size: 12px; font-weight: normal; margin-top: 8px;">
+        Kontaktiere uns direkt oder buche online
+      </p>
+    </div>
+
+    <p class="description">
+      Schreib deine Infos rein und reserviere deinen Cut. Wir senden dir eine Bestätigung per E-Mail.
+    </p>
+
+    <div class="prices">
+      <strong>💇 Preise:</strong>
+      Fade / Cut — 20 CHF<br />
+      Cut + Bart — 25 CHF
+    </div>
+
+    <form id="bookingForm">
+      <input type="text" id="name" placeholder="Dein Name" required />
+      <span class="error" id="nameError"></span>
+
+      <input type="email" id="email" placeholder="Deine E-Mail Adresse" required />
+      <span class="error" id="emailError"></span>
+
+      <input type="tel" id="phone" placeholder="Telefonnummer" required />
+      <span class="error" id="phoneError"></span>
+
+      <input type="date" id="date" required />
+      <span class="error" id="dateError"></span>
+
+      <input type="time" id="time" required />
+      <span class="error" id="timeError"></span>
+
+      <select id="service" required>
+        <option value="">Service auswählen</option>
+        <option value="fade-cut">Fade / Cut — 20 CHF</option>
+        <option value="cut-beard">Cut + Bart — 25 CHF</option>
+      </select>
+      <span class="error" id="serviceError"></span>
+
+      <button type="submit" id="submitBtn">Termin anfragen</button>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Buche deinen Termin...</p>
+      </div>
+    </form>
+
+    <div class="success" id="success">
+      ✅ Termin gebucht! <br />
+      <small>Überprüfe deine E-Mail für die Bestätigung und den Kalender-Link.</small>
+    </div>
+
+    <div class="cash">
+      ⚠️ Nur Barzahlung möglich
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("bookingForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const loading = document.getElementById("loading");
+    const success = document.getElementById("success");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Clear previous errors
+      document.querySelectorAll(".error").forEach((el) => (el.style.display = "none"));
+
+      // Get form values
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const date = document.getElementById("date").value;
+      const time = document.getElementById("time").value;
+      const service = document.getElementById("service").value;
+
+      // Validation
+      let hasError = false;
+
+      if (!name || name.length < 2) {
+        showError("nameError", "Bitte geben Sie einen gültigen Namen ein");
+        hasError = true;
+      }
+
+      if (!email || !email.includes("@")) {
+        showError("emailError", "Bitte geben Sie eine gültige E-Mail ein");
+        hasError = true;
+      }
+
+      if (!phone || phone.length < 7) {
+        showError("phoneError", "Bitte geben Sie eine gültige Telefonnummer ein");
+        hasError = true;
+      }
+
+      if (!date) {
+        showError("dateError", "Bitte wählen Sie ein Datum");
+        hasError = true;
+      }
+
+      if (!time) {
+        showError("timeError", "Bitte wählen Sie eine Uhrzeit");
+        hasError = true;
+      }
+
+      if (!service) {
+        showError("serviceError", "Bitte wählen Sie einen Service");
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // Show loading
+      submitBtn.disabled = true;
+      loading.style.display = "block";
+      success.style.display = "none";
+
+      try {
+        const response = await fetch("/api/book", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            date,
+            time,
+            service,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Success
+          loading.style.display = "none";
+          success.style.display = "block";
+          form.reset();
+          setTimeout(() => {
+            success.style.display = "none";
+          }, 5000);
+        } else {
+          showError("nameError", data.message || "Es gab einen Fehler. Bitte versuchen Sie es später erneut.");
+          loading.style.display = "none";
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showError("nameError", "Verbindungsfehler. Bitte versuchen Sie es später erneut.");
+        loading.style.display = "none";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showError(elementId, message) {
+      const errorEl = document.getElementById(elementId);
+      errorEl.textContent = message;
+      errorEl.style.display = "block";
+    }
+
+    // Prevent past dates
+    const dateInput = document.getElementById("date");
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.min = today;
+  </script>
+</body>
+</html>
